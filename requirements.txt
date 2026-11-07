@@ -1,0 +1,6 @@
+# main.py 直接使用的库（其余依赖 pip 会自动安装）
+# 安装命令：pip install -r requirements.txt
+
+DrissionPage==4.1.1.4
+ddddocr==1.6.1
+openpyxl==3.1.5

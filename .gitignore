@@ -1,0 +1,16 @@
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# 虚拟环境（不上传）
+.venv/
+venv/
+
+# 编辑器配置
+.idea/
+
+# 程序运行时生成的表格
+第二课堂学时统计.xlsx
+
+# 体积较大的运行库安装包（改由 README 提供官方下载链接）
+VC_redist.x64.exe
