@@ -13,12 +13,13 @@ import os
 
 
 class SecondClassroomAutomator:
-    def __init__(self, web_url, user_id, user_pwd, incognito=False):
+    def __init__(self, web_url, user_id, user_pwd, incognito=False, save_path=""):
         """初始化配置和基础对象，新增 incognito 参数"""
         self.web_url = web_url
         self.user_id = user_id
         self.user_pwd = user_pwd
-        self.file_name = "第二课堂学时统计.xlsx"
+        # 【保存位置】留空 = 当前文件夹（默认文件名不变）；填文件夹 = 存到该文件夹；填 .xlsx 完整路径 = 存成该文件名
+        self.file_name = self._resolve_save_path(save_path)
 
         self.requirements = {
             "思想成长": 32, "创新创业": 48, "社会实践": 16,
@@ -76,6 +77,17 @@ class SecondClassroomAutomator:
         self.browser = DrissionPage.Chromium(options)
         self.tab = self.browser.latest_tab
         # ================================================
+
+    @staticmethod
+    def _resolve_save_path(save_path):
+        """把用户填写的保存位置解析成完整的文件名"""
+        target = (save_path or "").strip().strip('"').strip("'")
+        target = os.path.expanduser(target)
+        if not target:
+            return "第二课堂学时统计.xlsx"
+        if target.lower().endswith(".xlsx"):
+            return target
+        return os.path.join(target, "第二课堂学时统计.xlsx")
 
     def _clean_old_file(self):
         if os.path.exists(self.file_name):
@@ -265,6 +277,11 @@ class SecondClassroomAutomator:
 
         ws.freeze_panes = "A3"
 
+        save_dir = os.path.dirname(os.path.abspath(self.file_name))
+        if save_dir and not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+            print(f"[INFO] 保存文件夹不存在，已自动创建: {save_dir}")
+
         try:
             wb.save(self.file_name)
             print(f"[SUCCESS] 完美！彩色 Excel 表格生成成功！文件名: {os.path.abspath(self.file_name)}")
@@ -302,6 +319,11 @@ if __name__ == "__main__":
     # 你的配置信息
     WEB_URL = "https://ekapp.gxufe.edu.cn"  # 你的网址
 
+    # 【保存位置】生成的表格放在哪，留空就保存在当前文件夹（默认，文件名不变）
+    # 想换个文件夹：SAVE_PATH = r"D:\我的文件\第二课堂"
+    # 想连文件名一起改：SAVE_PATH = r"D:\我的文件\我的学时统计.xlsx"
+    SAVE_PATH = ""
+
     with open(file="account.json", mode='r', encoding='utf-8') as f:
         account = json.load(f)
     YOUR_ID = account["YOUR_ID"]
@@ -309,5 +331,5 @@ if __name__ == "__main__":
 
     # 【关键开关】设置为 True 开启无痕模式（每次都是新环境），False 则使用正常模式（享受记住密码的便利）
     USE_INCOGNITO = True
-    automator = SecondClassroomAutomator(WEB_URL, YOUR_ID, YOUR_PWD, incognito=USE_INCOGNITO)
+    automator = SecondClassroomAutomator(WEB_URL, YOUR_ID, YOUR_PWD, incognito=USE_INCOGNITO, save_path=SAVE_PATH)
     automator.run()
